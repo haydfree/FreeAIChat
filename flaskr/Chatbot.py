@@ -1,5 +1,6 @@
 from openai import OpenAI
 from typing import List
+from flaskr.ErrorHandler import ErrorHandler
 
 
 class Chatbot:
@@ -12,13 +13,47 @@ class Chatbot:
             self,
             apiKey: str,
     ):
+        self.__validateApiKey(apiKey)
+
         client = OpenAI(
-                api_key=apiKey
-            )
-        self.__apiKey = apiKey
-        self.setClient(client)
+            api_key=apiKey
+        )
+        self.__validateClient(
+            client=client,
+            apiKey=apiKey,
+        )
+
         self.setPrompts([])
         self.setResponses([])
+
+    def __validateApiKey(
+            self,
+            apiKey: str,
+    ) -> None:
+        ErrorHandler.validateApiKey(apiKey)
+        self.__apiKey = apiKey
+
+    def __validateClient(
+        self,
+        client: OpenAI,
+        apiKey: str,
+    ) -> None:
+        ErrorHandler.validateClient(
+            client=client,
+            apiKey=apiKey,
+        )
+        self.setClient(client)
+
+    def __validateStr(
+            self,
+            text: str,
+            isPrompt: bool,
+    ) -> None:
+        ErrorHandler.validateStr(text)
+        if isPrompt:
+            self.__prompts.append(text)
+        else:
+            self.__responses.append(text)
 
     def getClient(self) -> OpenAI:
         return self.__client
@@ -42,7 +77,10 @@ class Chatbot:
             self,
             prompt: str,
     ) -> None:
-        self.__prompts += prompt
+        self.__validateStr(
+            text=prompt,
+            isPrompt=True,
+        )
         
     def getResponses(self) -> List[str]:
         return self.__responses
@@ -57,7 +95,10 @@ class Chatbot:
         self,
         response: str,
     ) -> None:
-        self.__responses += response
+        self.__validateStr(
+            text=response,
+            isPrompt=False,
+        )
         
     def chat(
             self,
