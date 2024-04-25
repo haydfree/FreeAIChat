@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free GPT 4</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@1.16.5/dist/full.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet" type="text/css"/>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
+
+<div id="chat-container" class="bg-white p-8 rounded-md shadow-md">
+    <div id="chat-box" class="mb-4"></div>
+    <!-- Increase the size of the input field -->
+    <input type="text" id="user-input"
+        class="input input-bordered px-4 py-3 mr-2 w-64 h-12 focus:outline-none focus:border-blue-500"
+        placeholder="Type your message...">
+    <button onclick="sendMessage()" class="btn btn-primary">Send</button>
+</div>
+
+<script>
+    function sendMessage() {
+        var userInput = document.getElementById("user-input").value;
+        var chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML += "<p class='text-blue-700'>You: " + userInput + "</p>";
+        document.getElementById("user-input").value = "";
+
+        // Send user input to Flask backend
+        fetch("/chat", {
+            method: "POST",
+            body: JSON.stringify({userInput: userInput}),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML += "<p class='text-green-700'>AI: " + data.response + "</p>";
+            })
+            .catch(error => console.error("Error:", error));
+    }
+
+    // Add event listener for keydown event on the input field
+    document.getElementById("user-input").addEventListener("keydown", function(event) {
+        // Check if the pressed key is Enter (key code 13)
+        if (event.keyCode === 13) {
+            // Prevent the default behavior of the Enter key (submitting the form)
+            event.preventDefault();
+            // Call the sendMessage function
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>
